@@ -1,79 +1,65 @@
-[![JS.ORG](https://img.shields.io/badge/js.org-mithril-ffb400.svg?style=flat-square)](http://js.org)
-[![Join the chat at https://gitter.im/lhorie/mithril.js](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lhorie/mithril.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/lhorie/mithril.js.svg?branch=master)](https://travis-ci.org/lhorie/mithril.js)
+mithril.js [![NPM Version](https://img.shields.io/npm/v/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM License](https://img.shields.io/npm/l/mithril.svg)](https://www.npmjs.com/package/mithril) [![NPM Downloads](https://img.shields.io/npm/dm/mithril.svg)](https://www.npmjs.com/package/mithril) [![Donate at OpenCollective](https://img.shields.io/opencollective/all/mithriljs.svg?colorB=brightgreen)](https://opencollective.com/mithriljs)
+==========
 
-# Mithril
+<p align="center">
+	<a href="https://travis-ci.org/MithrilJS/mithril.js">
+		<img src="https://img.shields.io/travis/MithrilJS/mithril.js/next.svg" alt="Build Status">
+	</a>
+	<a href="https://gitter.im/mithriljs/mithril.js">
+		<img src="https://img.shields.io/gitter/room/mithriljs/mithril.js.svg" alt="Gitter" />
+	</a>
+</p>
 
-A Javascript Framework for Building Brilliant Applications
-
-See the [website](http://mithril.js.org) for documentation
-
-There's also a [blog](http://lhorie.github.io/mithril-blog) and a [mailing list](https://groups.google.com/forum/#!forum/mithriljs)
-
----
+- [What is Mithril?](#what-is-mithril)
+- [Installation](#installation)
+- [Documentation](#documentation)
+- [Getting Help](#getting-help)
+- [Contributing](#contributing)
 
 ## What is Mithril?
 
-Mithril is a client-side MVC framework - a tool to organize code in a way that is easy to think about and to maintain.
+A modern client-side Javascript framework for building Single Page Applications. It's small (<!-- size -->8.88 KB<!-- /size --> gzipped), fast and provides routing and XHR utilities out of the box.
 
-### Light-weight
+Mithril is used by companies like Vimeo and Nike, and open source platforms like Lichess 👍.
 
-- Only 7kb gzipped, no dependencies
-- Small API, small learning curve
+Mithril supports IE11, Firefox ESR, and the last two versions of Firefox, Edge, Safari, and Chrome. No polyfills required. 👌
 
-### Robust
+## Installation
 
-- Safe-by-default templates
-- Hierarchical MVC via components
+### CDN
 
-### Fast
-
-- Virtual DOM diffing and compilable templates
-- Intelligent auto-redrawing system
-
----
-
-## Sample code
-
-```javascript
-//namespace
-var app = {};
-
-//model
-app.PageList = function() {
-	return m.request({method: "GET", url: "pages.json"});
-};
-
-//controller
-app.controller = function() {
-	var pages = app.PageList();
-	return {
-		pages: pages,
-		rotate: function() {
-			pages().push(pages().shift());
-		}
-	}
-};
-
-//view
-app.view = function(ctrl) {
-	return [
-		ctrl.pages().map(function(page) {
-			return m("a", {href: page.url}, page.title);
-		}),
-		m("button", {onclick: ctrl.rotate}, "Rotate links")
-	];
-};
-
-
-//initialize
-m.mount(document.getElementById("example"), app);
+```html
+<script src="https://unpkg.com/mithril"></script>
+<!-- or -->
+<script src="https://cdn.jsdelivr.net/npm/mithril/mithril.js"></script>
 ```
 
+### npm
+```bash
+# For the most recent stable version
+$ npm install mithril --save
+# For the most recent unstable version
+$ npm install mithril@next --save
+```
+
+The ["Getting started" guide](https://mithril.js.org/#getting-started) is a good place to start learning how to use mithril.
+
+## Documentation
+
+Documentation lives on [mithril.js.org](https://mithril.js.org).
+
+You may be interested in the [API Docs](https://mithril.js.org/api.html), a [Simple Application](https://mithril.js.org/simple-application.html), or perhaps some [Examples](https://mithril.js.org/examples.html).
+
+## Getting Help
+
+Mithril has an active & welcoming community on [Gitter](https://gitter.im/mithriljs/mithril.js), or feel free to ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/mithril.js) using the `mithril.js` tag.
+
+## Contributing
+
+There's a [Contributing FAQ](https://mithril.js.org/contributing.html) on the mithril site that hopefully helps, but if not definitely hop into the [Gitter Room](https://gitter.im/mithriljs/mithril.js) and ask away!
+
 ---
 
-### Learn more
+Thanks for reading!
 
-- [Tutorial](http://mithril.js.org/getting-started.html)
-- [Differences from Other Frameworks](http://mithril.js.org/comparison.html)
-- [Benchmarks](http://mithril.js.org/benchmarks.html)
+🎁

@@ -1,527 +1,902 @@
-## Change Log
+# Change log
 
-[v0.2.1](http://mithril.js.org/archive/v0.2.1)
-
-### News:
-
--	added `catch` to promises
--	improvements and fixes in the documentation and wiki
--	large refactor to take better advantage of Chrome js optimizations and improve source code readability (thanks to @impinball)
--	`m(component, ...args)` can now be used as a shorthand for `m.component(component, ...args)`
-
-### Bug Fixes:
-
--	errors thrown from the exception monitor no longer freeze redrawing
--	fix edge case with falsy keys
--	fix controller prototype inheritance in component controllers
--	fix return value of `parseQueryString` if input is empty string
-
----
-
-[v0.2.0](http://mithril.js.org/archive/v0.2.0) - improved components
-
-### News:
-
--	Mithril modules will be referred to as *components* from now on.
--	Virtual DOM tree can now contain [components](mithril.component.md)
--	Components can now be parameterized via `m.component`
-
-### Deprecations:
-
--	`m.module` has been renamed `m.mount`. Calling `m.module` will still work, but should be considered deprecated. Rationale: Mithril modules and components are the same thing, therefore from now on, they will be referred to as components, since that name is more descriptive of their purpose, and causes less confusion in the face of ES6 modules.
-
-	In order to migrate, search for `m.module` calls and replace them with `m.mount`. The method signature is the same.
-
-### Bug Fixes:
-
--	fix diff edge case in `<select>` [#569](https://github.com/lhorie/mithril.js/issues/569)
--	fix support for arrays in template compiler
+- [v2.0.0-rc](#v200rc)
+- [v1.1.6](#v116)
+- [v1.1.5](#v115)
+- [v1.1.4](#v114)
+- [v1.1.3](#v113)
+- [v1.1.2](#v112)
+- [v1.1.1](#v111)
+- [v1.1.0](#v110)
+- [v1.0.1](#v101)
+- [Migrating from v0.2.x](#migrating-from-v02x)
+- [v1.x docs](http://mithril.js.org/archive/v1.1.6/index.html)
+- [v0.2 docs](http://mithril.js.org/archive/v0.2.5/index.html)
+- [`ospec` change log](https://github.com/MithrilJS/mithril.js/blob/master/ospec/change-log.md)
+- [`mithril/stream` change log](https://github.com/MithrilJS/mithril.js/blob/master/stream/change-log.md)
 
 ---
 
-[v0.1.34](http://mithril.js.org/archive/v0.1.34) - maintenance
+### Upcoming...
 
-### Bug Fixes:
+### v2.0.0-rc
 
--	fix identity bug when mixing unkeyable elements in a tree [#524](https://github.com/lhorie/mithril.js/issues/524)
+#### Breaking changes
 
----
+- API: Component vnode `children` are not normalized into vnodes on ingestion; normalization only happens if and when they are ingested by the view ([#2155](https://github.com/MithrilJS/mithril.js/pull/2155/) (thanks to [@magikstm](https://github.com/magikstm) for related optimization [#2064](https://github.com/MithrilJS/mithril.js/pull/2064)))
+- API: `m.redraw()` is always asynchronous ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: `m.mount()` will only render its own root when called, it will not trigger a `redraw()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: Assigning to `vnode.state` (as in `vnode.state = ...`) is no longer supported. Instead, an error is thrown if `vnode.state` changes upon the invocation of a lifecycle hook.
+- API: `m.request` will no longer reject the Promise on server errors (eg. status >= 400) if the caller supplies an `extract` callback. This gives applications more control over handling server responses.
+- hyperscript: when attributes have a `null` or `undefined` value, they are treated as if they were absent. [#1773](https://github.com/MithrilJS/mithril.js/issues/1773) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
+- API: `m.request` errors no longer copy response fields to the error, but instead assign the parsed JSON response to `error.response` and the HTTP status code `error.code`.
+- hyperscript: when an attribute is defined on both the first and second argument (as a CSS selector and an `attrs` field, respectively), the latter takes precedence, except for `class` attributes that are still added together. [#2172](https://github.com/MithrilJS/mithril.js/issues/2172) ([#2174](https://github.com/MithrilJS/mithril.js/pull/2174))
+- render: remove some redundancy within the component initialization code ([#2213](https://github.com/MithrilJS/mithril.js/pull/2213))
+- render: Align custom elements to work like normal elements, minus all the HTML-specific magic. ([#2221](https://github.com/MithrilJS/mithril.js/pull/2221))
+- render: simplify component removal ([#2214](https://github.com/MithrilJS/mithril.js/pull/2214))
+- cast className using toString ([#2309](https://github.com/MithrilJS/mithril.js/pull/2309))
+- render: call attrs' hooks first, with express exception of `onbeforeupdate` to allow attrs to block components from even diffing ([#2297](https://github.com/MithrilJS/mithril.js/pull/2297))
+- API: `m.withAttr` removed. ([#2317](https://github.com/MithrilJS/mithril.js/pull/2317))
 
-[v0.1.33](http://mithril.js.org/archive/v0.1.33) - maintenance
+#### News
 
-### Bug Fixes:
+- Mithril now only officially supports IE11, Firefox ESR, and the last two versions of Chrome/FF/Edge/Safari. ([#2296](https://github.com/MithrilJS/mithril.js/pull/2296))
+- API: Introduction of `m.redraw.sync()` ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- API: Event handlers may also be objects with `handleEvent` methods ([#1949](https://github.com/MithrilJS/mithril.js/pull/1949), [#2222](https://github.com/MithrilJS/mithril.js/pull/2222)).
+- API: `m.route.link` accepts an optional `options` object ([#1930](https://github.com/MithrilJS/mithril.js/pull/1930))
+- API: `m.request` better error message on JSON parse error - ([#2195](https://github.com/MithrilJS/mithril.js/pull/2195), [@codeclown](https://github.com/codeclown))
+- API: `m.request` supports `timeout` as attr - ([#1966](https://github.com/MithrilJS/mithril.js/pull/1966))
+- API: `m.request` supports `responseType` as attr - ([#2193](https://github.com/MithrilJS/mithril.js/pull/2193))
+- Mocks: add limited support for the DOMParser API ([#2097](https://github.com/MithrilJS/mithril.js/pull/2097))
+- API: add support for raw SVG in `m.trust()` string ([#2097](https://github.com/MithrilJS/mithril.js/pull/2097))
+- render/core: remove the DOM nodes recycling pool ([#2122](https://github.com/MithrilJS/mithril.js/pull/2122))
+- render/core: revamp the core diff engine, and introduce a longest-increasing-subsequence-based logic to minimize DOM operations when re-ordering keyed nodes.
+- docs: Emphasize Closure Components for stateful components, use them for all stateful component examples.
+- API: ES module bundles are now available for `mithril` and `mithril/stream` ([#2194](https://github.com/MithrilJS/mithril.js/pull/2194) [@porsager](https://github.com/porsager)).
+    - All of the `m.*` properties from `mithril` are re-exported as named exports in addition to being attached to `m`.
+    - `m()` itself from `mithril` is exported as the default export.
+    - `mithril/stream`'s primary export is exported as the default export.
+- fragments: allow same attrs/children overloading logic as hyperscript ([#2328](https://github.com/MithrilJS/mithril.js/pull/2328))
 
--	fix diff bug when mixing `undefined` in a tree [#524](https://github.com/lhorie/mithril.js/issues/524)
--	fix reference to map file in package.json for cdnjs
--	fix links in documentation
+#### Bug fixes
 
----
-
-[v0.1.32](http://mithril.js.org/archive/v0.1.32) - maintenance
-
-### Bug Fixes:
-
--	fix regression caused by [#454](https://github.com/lhorie/mithril.js/issues/454)
-
----
-
-[v0.1.31](http://mithril.js.org/archive/v0.1.31) - maintenance
-
-### News:
-
--	Typescript definitions are more strongly typed
--	m.request's `unwrapSuccess` and `unwrapError` callbacks now receive the XMLHttpRequest instance as a second parameter
--	3rd parameter for `m.route(route, params, shouldReplaceHistory)` is now public
--	exact routes now have higher precedence than routes w/ variables [#452](https://github.com/lhorie/mithril.js/issues/452)
--	there's now a `retain` flag to control on-route-change diff strategy on a per-element basis
-
-### Bug Fixes:
-
--	fix routing bug in IE9 [#320](https://github.com/lhorie/mithril.js/issues/320)
--	fix ordering bug in m.trust when using HTML entities [#453](https://github.com/lhorie/mithril.js/issues/453)
--	set promise's default value to initialValue if coming from m.request [#454](https://github.com/lhorie/mithril.js/issues/454)
--	fix dom element ownership bug when mixing keyed elements and third party plugin elements [#463](https://github.com/lhorie/mithril.js/issues/463)
--	fix edge case in flatten algorithm [#448](https://github.com/lhorie/mithril.js/issues/448)
--	prevent unnecessary DOM move operation when mixing keyed and unkeyed elements [#398](https://github.com/lhorie/mithril.js/issues/398)
--	revert [#382](https://github.com/lhorie/mithril.js/issues/382) due to diff regression [#512](https://github.com/lhorie/mithril.js/issues/512)
-
----
-
-[v0.1.30](http://mithril.js.org/archive/v0.1.30) - maintenance
-
-### Bug Fixes:
-
--	fix history.back() regression [#435](https://github.com/lhorie/mithril.js/issues/435)
--	fix module.view's `this` association regression in Haxe environment [#434](https://github.com/lhorie/mithril.js/issues/434)
--	fix array serialization syntax in querystrings [#440](https://github.com/lhorie/mithril.js/issues/440)
-
----
-
-[v0.1.29](http://mithril.js.org/archive/v0.1.29) - maintenance
-
-### News:
-
--	Calling m.module without a module now unloads the current one [#420](https://github.com/lhorie/mithril.js/issues/420)
--	Both `controller` and `view` properties in modules are now optional
-
-### Bug Fixes:
-
--	prevent empty class attributes [#382](https://github.com/lhorie/mithril.js/issues/382)
--	array-to-querystring serialization in `m.request` now behaves like jQuery [#426](https://github.com/lhorie/mithril.js/issues/426)
--	fix querystring detection bug in pathname mode [#425](https://github.com/lhorie/mithril.js/issues/425)
--	don't add history entry if reloading from a link [#428](https://github.com/lhorie/mithril.js/issues/428)
--	fix key association when DOM order is modified by external code [#424](https://github.com/lhorie/mithril.js/issues/424)
+- API: `m.route.set()` causes all mount points to be redrawn ([#1592](https://github.com/MithrilJS/mithril.js/pull/1592))
+- render/attrs: Using style objects in hyperscript calls will now properly diff style properties from one render to another as opposed to re-writing all element style properties every render.
+- render/attrs All vnodes attributes are properly removed when absent or set to `null` or `undefined` [#1804](https://github.com/MithrilJS/mithril.js/issues/1804) [#2082](https://github.com/MithrilJS/mithril.js/issues/2082) ([#1865](https://github.com/MithrilJS/mithril.js/pull/1865), [#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
+- render/core: Render state correctly on select change event [#1916](https://github.com/MithrilJS/mithril.js/issues/1916) ([#1918](https://github.com/MithrilJS/mithril.js/pull/1918) [@robinchew](https://github.com/robinchew), [#2052](https://github.com/MithrilJS/mithril.js/pull/2052))
+- render/core: fix various updateNodes/removeNodes issues when the pool and fragments are involved [#1990](https://github.com/MithrilJS/mithril.js/issues/1990), [#1991](https://github.com/MithrilJS/mithril.js/issues/1991), [#2003](https://github.com/MithrilJS/mithril.js/issues/2003), [#2021](https://github.com/MithrilJS/mithril.js/pull/2021)
+- render/core: fix crashes when the keyed vnodes with the same `key` had different `tag` values [#2128](https://github.com/MithrilJS/mithril.js/issues/2128) [@JacksonJN](https://github.com/JacksonJN) ([#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
+- render/core: fix cached nodes behavior in some keyed diff scenarios [#2132](https://github.com/MithrilJS/mithril.js/issues/2132) ([#2130](https://github.com/MithrilJS/mithril.js/pull/2130))
+- render/events: `addEventListener` and `removeEventListener` are always used to manage event subscriptions, preventing external interference.
+- render/events: Event listeners allocate less memory, swap at low cost, and are properly diffed now when rendered via `m.mount()`/`m.redraw()`.
+- render/events: `Object.prototype` properties can no longer interfere with event listener calls.
+- render/events: Event handlers, when set to literally `undefined` (or any non-function), are now correctly removed.
+- render/hooks: fixed an ommission that caused `oninit` to be called unnecessarily in some cases [#1992](https://github.com/MithrilJS/mithril.js/issues/1992)
+- docs: tweaks: ([#2104](https://github.com/MithrilJS/mithril.js/pull/2104) [@mikeyb](https://github.com/mikeyb), [#2205](https://github.com/MithrilJS/mithril.js/pull/2205), [@cavemansspa](https://github.com/cavemansspa), [#2250](https://github.com/MithrilJS/mithril.js/pull/2250) [@isiahmeadows](https://github.com/isiahmeadows), [#2265](https://github.com/MithrilJS/mithril.js/pull/2265), [@isiahmeadows](https://github.com/isiahmeadows))
+- render/core: avoid touching `Object.prototype.__proto__` setter with `key: "__proto__"` in certain situations ([#2251](https://github.com/MithrilJS/mithril.js/pull/2251))
+- render/core: Vnodes stored in the dom node supplied to `m.render()` are now normalized [#2266](https://github.com/MithrilJS/mithril.js/pull/2266)
+- render/core: CSS vars can now be specified in `{style}` attributes ([#2192](https://github.com/MithrilJS/mithril.js/pull/2192) [@barneycarroll](https://github.com/barneycarroll)), ([#2311](https://github.com/MithrilJS/mithril.js/pull/2311) [@porsager](https://github.com/porsager)), ([#2312](https://github.com/MithrilJS/mithril.js/pull/2312) [@isiahmeadows](https://github.com/isiahmeadows))
+- request: don't modify params, call `extract`/`serialize`/`deserialize` with correct `this` value ([#2288](https://github.com/MithrilJS/mithril.js/pull/2288))
 
 ---
 
-[v0.1.28](http://mithril.js.org/archive/v0.1.28) - maintenance
 
-### News:
+### v1.2.0
 
--	Landed some performance improvements
+#### News
 
-### Bug Fixes:
+- Promise polyfill implementation separated from polyfilling logic.
+- `PromisePolyfill` is now available on the exported/global `m`.
 
--	throw error if root element is null in m.module/m.route [#388](https://github.com/lhorie/mithril.js/issues/388)
+#### Bug fixes
 
----
+- core: Workaround for [Internet Explorer bug](https://www.tjvantoll.com/2013/08/30/bugs-with-document-activeelement-in-internet-explorer/) when running in an iframe
 
-[v0.1.27](http://mithril.js.org/archive/v0.1.27) - maintenance
+#### Note
 
-### Bug Fixes:
-
--	prevent strategy("none") event contamination [#378](https://github.com/lhorie/mithril.js/issues/378)
--	fix equality strictness [#379](https://github.com/lhorie/mithril.js/issues/379)
--	fix keys bug when list has nulls [#299](https://github.com/lhorie/mithril.js/issues/299)
--	make sure empty value in option tag creates attribute [#380](https://github.com/lhorie/mithril.js/issues/380)
+- Stream references no longer magically coerce to their underlying values ([#2150](https://github.com/MithrilJS/mithril.js/pull/2150), stream breaking change: `mithril-stream@2.0.0`)
 
 ---
 
-[v0.1.26](http://mithril.js.org/archive/v0.1.26) - maintenance
+### v1.1.6
 
-### Bug Fixes:
+#### Bug fixes
 
--	make sure input[type] is CSS-targetable [#364](https://github.com/lhorie/mithril.js/issues/364)
--	throw error if m.route.param is called before initializing routes [#361](https://github.com/lhorie/mithril.js/issues/361)
+- core: render() function can no longer prevent from changing `document.activeElement` in lifecycle hooks ([#1988](https://github.com/MithrilJS/mithril.js/pull/1988), [@purplecode](https://github.com/purplecode))
+- core: don't call `onremove` on the children of components that return null from the view [#1921](https://github.com/MithrilJS/mithril.js/issues/1921) [@octavore](https://github.com/octavore) ([#1922](https://github.com/MithrilJS/mithril.js/pull/1922))
+- hypertext: correct handling of shared attributes object passed to `m()`. Will copy attributes when it's necessary [#1941](https://github.com/MithrilJS/mithril.js/issues/1941) [@s-ilya](https://github.com/s-ilya) ([#1942](https://github.com/MithrilJS/mithril.js/pull/1942))
 
----
+#### Ospec improvements
 
-[v0.1.25](http://mithril.js.org/archive/v0.1.25) - maintenance
-
-### Bug Fixes:
-
--	fixed input cursor jumping regression
--	fixed interop bug when QUnit and AMD are used at the same time [#355](https://github.com/lhorie/mithril.js/issues/355)
--	fixed route arg duplication in edge case [#352](https://github.com/lhorie/mithril.js/issues/352)
--	prevented meaningless error in Chrome edge case [#358](https://github.com/lhorie/mithril.js/issues/358)
-
----
-
-[v0.1.24](http://mithril.js.org/archive/v0.1.24) - maintenance
-
-### Bug Fixes:
-
--	Prevent rogue `is` attribute from being created in Chrome
--	Fix `data` regression in `m.request`
+- ospec v1.4.0
+  - Added support for async functions and promises in tests ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928), [@StephanHoyer](https://github.com/StephanHoyer))
+  - Error handling for async tests with `done` callbacks supports error as first argument ([#1928](https://github.com/MithrilJS/mithril.js/pull/1928))
+  - Error messages which include newline characters do not swallow the stack trace [#1495](https://github.com/MithrilJS/mithril.js/issues/1495) ([#1984](https://github.com/MithrilJS/mithril.js/pull/1984), [@RodericDay](https://github.com/RodericDay))
+- ospec v2.0.0 (to be released)
+  - Added support for custom reporters ([#2009](https://github.com/MithrilJS/mithril.js/pull/2020))
+  - Make Ospec more [Flems](https://flems.io)-friendly ([#2034](https://github.com/MithrilJS/mithril.js/pull/2034))
+    - Works either as a global or in CommonJS environments
+    - the o.run() report is always printed asynchronously (it could be synchronous before if none of the tests were async).
+    - Properly point to the assertion location of async errors [#2036](https://github.com/MithrilJS/mithril.js/issues/2036)
+    - expose the default reporter as `o.report(results)`
+    - Don't try to access the stack traces in IE9
 
 ---
 
-[v0.1.23](http://mithril.js.org/archive/v0.1.23) - maintenance
+### v1.1.5
 
-### News:
+#### Bug fixes
 
--	There's now support for extended custom elements (e.g. `m("button[is=my-button]")`)
--	`m.request` now supports a `initialValue` option to help prevent type errors in views when using the `background` option
-
-### Bug Fixes:
-
--	docs now have anchor links for easier navigation
--	fixed a bunch of IE8 issues [#298](https://github.com/lhorie/mithril.js/issues/298)
--	fixed handling of `method` option in JSONP mode [#292](https://github.com/lhorie/mithril.js/issues/292)
--	fixed source map files
--	fixed handling of select[multiple]
--	fixed template compiler edge case [#286](https://github.com/lhorie/mithril.js/issues/286)
--	fixed pathname bug in m.route [#290](https://github.com/lhorie/mithril.js/issues/290)
--	fixed pathname querystring bug in routed links [#304](https://github.com/lhorie/mithril.js/issues/304)
--	fixed handling of value in inputs when model value is not in sync with input value [#336](https://github.com/lhorie/mithril.js/issues/336)
+- API: If a user sets the Content-Type header within a request's options, that value will be the entire header value rather than being appended to the default value [#1919](https://github.com/MithrilJS/mithril.js/issues/1919) ([#1924](https://github.com/MithrilJS/mithril.js/pull/1924), [@tskillian](https://github.com/tskillian))
 
 ---
 
-[v0.1.22](http://mithril.js.org/archive/v0.1.22) - maintenance
+### v1.1.4
 
-### News:
+#### Bug fixes
 
--	docs now have anchor links for easier navigation
--	there is more documentation for things that weren't that clear
--	json-p support added
--	`m()` now supports splat for children (e.g. `m("div", m("a"), m("b"), m("i"))` for nicer Coffeescript syntax
--	by popular demand, `m.module` now returns a controller instance
+- Fix IE bug where active element is null causing render function to throw error ([#1943](https://github.com/MithrilJS/mithril.js/pull/1943), [@JacksonJN](https://github.com/JacksonJN))
 
-### Bug Fixes:
+#### Ospec improvements:
 
--	gracefully degrade on IE exceptions when setting invalid values
--	fixes for Typescript definition file
--	fixed bug in keys algorithm when mixing keyed and unkeyed elements [#246](https://github.com/lhorie/mithril.js/issues/246)
--	added promise exception monitor and reverted promise exception handling semantics to v0.1.19 semantics (see [docs](mithril.deferred.md#unchecked-error-handling))
--	fixed redraw scheduling bug in old version of IE
--	fixed incorrect diff when document is root, and html element is omitted
--	fixed querystring clobbering in links w/ config:m.route [#261](https://github.com/lhorie/mithril.js/issues/261)
--	fixed rare bug that made events get dropped [#214](https://github.com/lhorie/mithril.js/issues/214)
--	don't send Content-Type header if there's no request data [#280](https://github.com/lhorie/mithril.js/issues/280)
+- Log using util.inspect to show object content instead of "[object Object]" ([#1661](https://github.com/MithrilJS/mithril.js/issues/1661), [@porsager](https://github.com/porsager))
 
 ---
 
-[v0.1.21](http://mithril.js.org/archive/v0.1.21) - maintenance
+### v1.1.3
 
-### News:
+#### Bug fixes
 
--	passing a promise to an `m.prop` now populates it with the resolved value upon resolution, and returns `undefined` otherwise
--	`m.redraw` can now be forced to called synchronously
-
-### Bug Fixes:
-
--	fixed handling of `+` character in `m.route.param` [#204](https://github.com/lhorie/mithril.js/issues/204)
--	fixed corner case for undefined children in diff [#206](https://github.com/lhorie/mithril.js/issues/206)
--	fixed context.onunload for array items [#200](https://github.com/lhorie/mithril.js/issues/200)
--	fixed handling on comments in HTML converter tool
+- move out npm dependencies added by mistake
 
 ---
 
-[v0.1.20](http://mithril.js.org/archive/v0.1.20) - maintenance
+### v1.1.2
 
-### News:
+#### Bug fixes
 
--	redraw strategy can now be modified via `m.redraw.strategy`
--	`math` tags now automatically get created with the MathML namespace
-
-### Bug Fixes:
-
--	fixed IE8 null reference exception in `m`
--	fixed IE8 empty-text-node-in-input issue [#195](https://github.com/lhorie/mithril.js/issues/195)
--	fixed `m.sync` resolution when passed an empty array [#191](https://github.com/lhorie/mithril.js/issues/191)
-
----
-
-[v0.1.19](http://mithril.js.org/archive/v0.1.19) - maintenance
-
-### Bug Fixes:
-
--	fixed double redraw when events fire simultaneously [#151](https://github.com/lhorie/mithril.js/issues/151)
--	fixed node insertion bug when using document as root [#153](https://github.com/lhorie/mithril.js/issues/153)
--	prevent routes from reverting to original route in some cases
--	fixed nested array ordering [#156](https://github.com/lhorie/mithril.js/issues/156)
--	fixed key ordering in interpolation case [#157](https://github.com/lhorie/mithril.js/issues/157)
+- core: Namespace fixes [#1819](https://github.com/MithrilJS/mithril.js/issues/1819), ([#1825](https://github.com/MithrilJS/mithril.js/pull/1825) [@SamuelTilly](https://github.com/SamuelTilly)), [#1820](https://github.com/MithrilJS/mithril.js/issues/1820) ([#1864](https://github.com/MithrilJS/mithril.js/pull/1864)), [#1872](https://github.com/MithrilJS/mithril.js/issues/1872) ([#1873](https://github.com/MithrilJS/mithril.js/pull/1873))
+- core: Fix select option to allow empty string value [#1814](https://github.com/MithrilJS/mithril.js/issues/1814) ([#1828](https://github.com/MithrilJS/mithril.js/pull/1828) [@spacejack](https://github.com/spacejack))
+- core: Reset e.redraw when it was set to `false` [#1850](https://github.com/MithrilJS/mithril.js/issues/1850) ([#1890](https://github.com/MithrilJS/mithril.js/pull/1890))
+- core: differentiate between `{ value: "" }` and `{ value: 0 }` for form elements [#1595 comment](https://github.com/MithrilJS/mithril.js/pull/1595#issuecomment-304071453) ([#1862](https://github.com/MithrilJS/mithril.js/pull/1862))
+- core: Don't reset the cursor of textareas in IE10 when setting an identical `value` [#1870](https://github.com/MithrilJS/mithril.js/issues/1870) ([#1871](https://github.com/MithrilJS/mithril.js/pull/1871))
+- hypertext: Correct handling of `[value=""]` ([#1843](https://github.com/MithrilJS/mithril.js/issues/1843), [@CreaturesInUnitards](https://github.com/CreaturesInUnitards))
+- router: Don't overwrite the options object when redirecting from `onmatch with m.route.set()` [#1857](https://github.com/MithrilJS/mithril.js/issues/1857) ([#1889](https://github.com/MithrilJS/mithril.js/pull/1889))
+- stream: Move the "use strict" directive inside the IIFE [#1831](https://github.com/MithrilJS/mithril.js/issues/1831) ([#1893](https://github.com/MithrilJS/mithril.js/pull/1893))
 
 ---
 
-[v0.1.18](http://mithril.js.org/archive/v0.1.18) - maintenance
+#### Docs / Repo maintenance
 
-### Bug Fixes:
+Our thanks to [@0joshuaolson1](https://github.com/0joshuaolson1), [@ACXgit](https://github.com/ACXgit), [@cavemansspa](https://github.com/cavemansspa), [@CreaturesInUnitards](https://github.com/CreaturesInUnitards), [@dlepaux](https://github.com/dlepaux), [@isaaclyman](https://github.com/isaaclyman), [@kevinkace](https://github.com/kevinkace), [@micellius](https://github.com/micellius), [@spacejack](https://github.com/spacejack) and [@yurivish](https://github.com/yurivish)
 
--	routing now correctly clears diff cache [#148](https://github.com/lhorie/mithril.js/issues/148)
--	fixed incorrect context unloading when reattaching a child to a new parent
+#### Other
 
----
-
-[v0.1.17](http://mithril.js.org/archive/v0.1.17) - maintenance
-
-### News:
-
--	config contexts can now have an `onunload` property for clean up tasks after elements are detached from the document
--	route changes now re-render from scratch, rather than attempting a virtual dom diff
--	virtual elements that are children of an array can now accept a `key` attribute which maintains the identity of the underlying DOM elements when the array gets shuffled [#98](https://github.com/lhorie/mithril.js/issues/98)
-
-### Bug Fixes:
-
--	fixed a subtree directive bug that happened in inputs inside loops
--	fixed select.value so that the correct option is displayed on first render
--	in m.request, non-idempotent methods now automatically send appropriate Content-Type header if `serialize` is `JSON.stringify` [#139](https://github.com/lhorie/mithril.js/issues/139)
--	`m` selectors now correctly handle empty attribute values like `[href='']`
--	pre-existing nodes in a root element now get cleared if there's no cell cache associated with the element [#60](https://github.com/lhorie/mithril.js/issues/60)
+- Addition of a performance regression test suite ([#1789](https://github.com/MithrilJS/mithril.js/issues/1789))
 
 ---
 
-[v0.1.16](http://mithril.js.org/archive/v0.1.16) - maintenance
+### v1.1.1
 
-### News:
+#### Bug fixes
 
--	controller::onunload now receives an event parameter so that the unloading can be aborted [#135](https://github.com/lhorie/mithril.js/issues/135)
-
-### Bug Fixes:
-
--	prevent route change when only hash changes in non-hash mode [#107](https://github.com/lhorie/mithril.js/issues/107)
--	config now always runs after template is attached to document [#109](https://github.com/lhorie/mithril.js/issues/109)
--	fix null reference exception with Browserify [#110](https://github.com/lhorie/mithril.js/issues/110)
--	fix nested array removal edge cases [#120](https://github.com/lhorie/mithril.js/issues/120)
--	ignore redraw calls when controller is not ready [#127](https://github.com/lhorie/mithril.js/issues/127)
--	fix null reference exception in nested array edge case [#129](https://github.com/lhorie/mithril.js/issues/129)
--	fix a contenteditable null reference error [#134](https://github.com/lhorie/mithril.js/issues/134)
--	fix textarea value diffing when value is a node inside an array [#136](https://github.com/lhorie/mithril.js/issues/136)
--	fix diff bug with trusted strings [#138](https://github.com/lhorie/mithril.js/issues/138)
-
-### Breaking changes:
-
--	Due to the poor level of compatibility between XDomainRequest and XHR2, XDomainRequest is no longer called internally by Mithril. If you need to use CORS in IE9 or lower, you will need to return an XDomainRequest instance from `m.request`'s `config` method [#121](https://github.com/lhorie/mithril.js/issues/121)
+- hyperscript: Allow `0` as the second argument to `m()` - [#1752](https://github.com/MithrilJS/mithril.js/issues/1752) / [#1753](https://github.com/MithrilJS/mithril.js/pull/1753) ([@StephanHoyer](https://github.com/StephanHoyer))
+- hyperscript: restore `attrs.class` handling to what it was in v1.0.1 - [#1764](https://github.com/MithrilJS/mithril.js/issues/1764) / [#1769](https://github.com/MithrilJS/mithril.js/pull/1769)
+- documentation improvements ([@JAForbes](https://github.com/JAForbes), [@smuemd](https://github.com/smuemd), [@hankeypancake](https://github.com/hankeypancake))
 
 ---
 
-[v0.1.15](http://mithril.js.org/archive/v0.1.15) - maintenance
+### v1.1.0
 
-### Bug Fixes:
+#### News
 
--	`m.sync` now correctly passes arguments to resolver in same order as input arguments [#96](https://github.com/lhorie/mithril.js/issues/96) 
--	fixed diff deletion bug [#99](https://github.com/lhorie/mithril.js/issues/99) 
--	updating textarea attributes updates its value correctly [#100](https://github.com/lhorie/mithril.js/issues/100)
+- support for ES6 class components
+- support for closure components
+- improvements in build and release automation
 
----
+#### Bug fixes
 
-[v0.1.14](http://mithril.js.org/archive/v0.1.14) - maintenance
-
-### News:
-
--	The signature of `m` now accepts virtual elements as the second parameter of the function.
--	`m.route(path, params)` now accepts an argument that gets parsed as a querystring.
--	routes now ignore trailing slashes [#88](https://github.com/lhorie/mithril.js/issues/88)
-
-### Bug Fixes:
-
--	Resolving promises early without a value now works [#85](https://github.com/lhorie/mithril.js/issues/85)
--	Throwing exceptions within `m.request` now follow the same resolution procedure as `m.deferred` [#86](https://github.com/lhorie/mithril.js/issues/85)
--	Promises now always update their `m.prop` on success (and leave the m.prop alone on error)
--	Nested arrays no longer cause double removal of elements [#87](https://github.com/lhorie/mithril.js/issues/87)
--	HTTP error codes now correctly reject promises
+- fix IE11 input[type] error - [#1610](https://github.com/MithrilJS/mithril.js/issues/1610)
+- apply [#1609](https://github.com/MithrilJS/mithril.js/issues/1609) to unkeyed children case
+- fix abort detection [#1612](https://github.com/MithrilJS/mithril.js/issues/1612)
+- fix input value focus issue when value is loosely equal to old value [#1593](https://github.com/MithrilJS/mithril.js/issues/1593)
 
 ---
 
-[v0.1.13](http://mithril.js.org/archive/v0.1.13) - maintenance
+### v1.0.1
 
-### News:
+#### News
 
--	m.module now runs clean-up code in root module controllers that implement an `onunload` instance method [#82](https://github.com/lhorie/mithril.js/issues/82)
+- performance improvements in IE [#1598](https://github.com/MithrilJS/mithril.js/pull/1598)
 
-### Bug Fixes:
+#### Bug fixes
 
--	Removing CSS rules now diffs correctly [#79](https://github.com/lhorie/mithril.js/issues/79)
-
----
-
-[v0.1.12](http://mithril.js.org/archive/v0.1.12) - maintenance
-
-### News:
-
--	It's now possible to define [variadic routes](mithril.route.md#variadic-routes) [#70](https://github.com/lhorie/mithril.js/issues/70)
-
-### Bug Fixes:
-
--	Fix link location in links using `config: m.route` after redraws [#74](https://github.com/lhorie/mithril.js/issues/74)
--	Fixed support for `list` attribute in inputs [#69](https://github.com/lhorie/mithril.js/issues/69)
--	Fixed URL decoding in route params [#75](https://github.com/lhorie/mithril.js/issues/75)
+- prevent infinite loop in non-existent default route - [#1579](https://github.com/MithrilJS/mithril.js/issues/1579)
+- call correct lifecycle methods on children of recycled keyed vnodes - [#1609](https://github.com/MithrilJS/mithril.js/issues/1609)
 
 ---
 
-[v0.1.11](http://mithril.js.org/archive/v0.1.11) - maintenance
+### Migrating from `v0.2.x`
 
-### News:
+`v1.x` is largely API-compatible with `v0.2.x`, but there are some breaking changes.
 
--	Added `m.route()` overload to allow reading of current route [#61](https://github.com/lhorie/mithril.js/issues/61)
--	Added `background` option to `m.request` to allow requests that don't affect rendering [#62](https://github.com/lhorie/mithril.js/issues/62)
+If you are migrating, consider using the [mithril-codemods](https://www.npmjs.com/package/mithril-codemods) tool to help automate the most straightforward migrations.
 
-### Bug Fixes:
-
--	Links using `config: m.route` can now be opened in new tab correctly [#64](https://github.com/lhorie/mithril.js/issues/64)
--	Fixed diff within contenteditable areas [#65](https://github.com/lhorie/mithril.js/issues/65)
-
----
-
-[v0.1.10](http://mithril.js.org/archive/v0.1.10) - maintenance
-
-### News:
-
--	Added social buttons to homepage
-
-### Bug Fixes:
-
--	Bi-directional bindings no longer wipe out cursor position in Chrome [#58](https://github.com/lhorie/mithril.js/issues/58)
-
----
-
-[v0.1.9](http://mithril.js.org/archive/v0.1.9) - maintenance
-
-### News:
-
--	Added comparison with React to homepage
--	Added support for multi-island apps [#34](https://github.com/lhorie/mithril.js/issues/34)
--	m.prop is now JSON-serializable [#54](https://github.com/lhorie/mithril.js/issues/54)
--	Added `extract` option to `m.request` to allow access to response metadata [#53](https://github.com/lhorie/mithril.js/issues/53)
-
-### Bug Fixes:
-
--	Fixed node index displacement by null/undefined nodes [#56](https://github.com/lhorie/mithril.js/issues/56)
--	Fixed mock's insertBefore and appendChild when dealing w/ reattachments
-
-### Breaking changes:
-
--	changing an id in a  virtual element now recreates the element, instead of recycling it [#55](https://github.com/lhorie/mithril.js/issues/55)
+- [`m.prop` removed](#mprop-removed)
+- [`m.component` removed](#mcomponent-removed)
+- [`config` function](#config-function)
+- [Changes in redraw behaviour](#changes-in-redraw-behaviour)
+   - [No more redraw locks](#no-more-redraw-locks)
+   - [Cancelling redraw from event handlers](#cancelling-redraw-from-event-handlers)
+   - [Synchronous redraw removed](#synchronous-redraw-removed)
+   - [`m.startComputation`/`m.endComputation` removed](#mstartcomputationmendcomputation-removed)
+- [Component `controller` function](#component-controller-function)
+- [Component arguments](#component-arguments)
+- [`view()` parameters](#view-parameters)
+- [Passing components to `m()`](#passing-components-to-m)
+- [Passing vnodes to `m.mount()` and `m.route()`](#passing-vnodes-to-mmount-and-mroute)
+- [`m.route.mode`](#mroutemode)
+- [`m.route` and anchor tags](#mroute-and-anchor-tags)
+- [Reading/writing the current route](#readingwriting-the-current-route)
+- [Accessing route params](#accessing-route-params)
+- [Building/Parsing query strings](#buildingparsing-query-strings)
+- [Preventing unmounting](#preventing-unmounting)
+- [Run code on component removal](#run-code-on-component-removal)
+- [`m.request`](#mrequest)
+- [`m.deferred` removed](#mdeferred-removed)
+- [`m.sync` removed](#msync-removed)
+- [`xlink` namespace required](#xlink-namespace-required)
+- [Nested arrays in views](#nested-arrays-in-views)
+- [`vnode` equality checks](#vnode-equality-checks)
 
 ---
 
-[v0.1.8](http://mithril.js.org/archive/v0.1.8) - maintenance
+## `m.prop` removed
 
-### News:
+In `v1.x`, `m.prop()` is now a more powerful stream micro-library, but it's no longer part of core. You can read about how to use the optional Streams module in [the documentation](stream.md).
 
--	Mock now contains a basic `insertAdjacentHTML` implementation to enable better testing of `m.trust` / `m.render` interactions
+### `v0.2.x`
 
-### Bug Fixes:
+```javascript
+var m = require("mithril")
 
--	Fixed ordering bug in deep subchildren [#51](https://github.com/lhorie/mithril.js/issues/51)
--	Fixed ordering bug with trusted strings [#51](https://github.com/lhorie/mithril.js/issues/51)
+var num = m.prop(1)
+```
 
----
+### `v1.x`
 
-[v0.1.7](http://mithril.js.org/archive/v0.1.7) - maintenance
+```javascript
+var m = require("mithril")
+var prop = require("mithril/stream")
 
-### News:
-
--	Mithril will be on a accelerated release cycle for the rest of the v0.1.x series. This means CDNs may lag behind in versions, so it's recommended that you either use one of the supported NodeJS package managers or fork from the Github repo directly. More information can be found [here](https://groups.google.com/forum/#!msg/mithriljs/mc0qTgFTlgs/OD7Mc7_2Wa4J)
-
-### Bug Fixes:
-
--	Fixed ordering bug when virtual element is preceded by array [#50](https://github.com/lhorie/mithril.js/issues/50)
-
----
-
-[v0.1.6](http://mithril.js.org/archive/v0.1.6) - maintenance
-
-### Bug Fixes:
-
--	Fixed serious bug when mixing cached text nodes with new virtual elements [#49](https://github.com/lhorie/mithril.js/issues/49)
+var num = prop(1)
+var doubled = num.map(function(n) {return n * 2})
+```
 
 ---
 
-[v0.1.5](http://mithril.js.org/archive/v0.1.5) - maintenance
+## `m.component` removed
 
-### News:
+In `v0.2.x` components could be created using either `m(component)` or `m.component(component)`. `v1.x` only supports `m(component)`.
 
--	Launched the [Mithril Blog](http://lhorie.github.io/mithril-blog)
+### `v0.2.x`
 
-### Bug Fixes:
+```javascript
+// These are equivalent
+m.component(component)
+m(component)
+```
 
--	Fixed serious ordering problem when mixing arrays with virtual elements [#48](https://github.com/lhorie/mithril.js/issues/48)
+### `v1.x`
 
----
-
-[v0.1.4](http://mithril.js.org/archive/v0.1.4) - maintenance
-
-### News:
-
--	added regression tests for reported bugs
--	added support for SVG
-
-### Bug Fixes:
-
--	URLs with port numbers are now handled correctly [#40](https://github.com/lhorie/mithril.js/issues/40)
--	NPM package now contains unminified version for map files [#39](https://github.com/lhorie/mithril.js/issues/39)
--	fixed ordering issue when mixing newly created virtual elements with elements from cache [#44](https://github.com/lhorie/mithril.js/issues/44)
--	fixed caching bug in links w/ config option attached [#43](https://github.com/lhorie/mithril.js/issues/43)
--	fixed attribute update bug when an element has both `oninput` and `onkeydown` handlers [#36](https://github.com/lhorie/mithril.js/issues/36)
+```javascript
+m(component)
+```
 
 ---
 
-[v0.1.3](http://mithril.js.org/archive/v0.1.3) - maintenance
+## `config` function
 
-### News:
+In `v0.2.x` mithril provided a single lifecycle method, `config`. `v1.x` provides much more fine-grained control over the lifecycle of a vnode.
 
--	Mithril is now available via [Component](http://component.io)
--	There's now an extra low-level optimization hook called a SubtreeDirective, which allows implementing plugins that only create virtual trees if necessary.
+### `v0.2.x`
 
-### Bug Fixes:
+```javascript
+m("div", {
+    config : function(element, isInitialized) {
+        // runs on each redraw
+        // isInitialized is a boolean representing if the node has been added to the DOM
+    }
+})
+```
 
--	diff no longer touch the DOM when processing `style` attributes and event handlers
--	returning a thennable to a resolution callback in `m.deferred().promise` now causes the promise to adopt its state 
--	diff now correctly clears subtree if null or undefined is passed as a node
+### `v1.x`
 
----
+More documentation on these new methods is available in [lifecycle-methods.md](lifecycle-methods.md).
 
-[v0.1.2](http://mithril.js.org/archive/v0.1.2) - maintenance
+```javascript
+m("div", {
+    // Called before the DOM node is created
+    oninit : function(vnode) { /*...*/ },
+    // Called after the DOM node is created
+    oncreate : function(vnode) { /*...*/ },
+    // Called before the node is updated, return false to cancel
+    onbeforeupdate : function(vnode, old) { /*...*/ },
+    // Called after the node is updated
+    onupdate : function(vnode) { /*...*/ },
+    // Called before the node is removed, return a Promise that resolves when
+    // ready for the node to be removed from the DOM
+    onbeforeremove : function(vnode) { /*...*/ },
+    // Called before the node is removed, but after onbeforeremove calls done()
+    onremove : function(vnode) { /*...*/ }
+})
+```
 
-### News:
-
--	There's now a [community mailing list](mailto:mithriljs@googlegroups.com). There's also a [web interface](https://groups.google.com/forum/#!forum/mithriljs)
--	Mithril is now on Travis CI. The build status can be found in the [project homepage](https://github.com/lhorie/mithril.js)
--	Mithril is now available via the CommonJS and AMD API
--	Mithril can now [be installed via npm and bower](installation.md)
-
-### Bug Fixes:
-
--	`m.render` now correctly reattaches reused DOM elements to replaced parent nodes [#31](https://github.com/lhorie/mithril.js/issues/31)
--	UI actions that can potentially de-synchronize the DOM from cache now force synchronization [#29](https://github.com/lhorie/mithril.js/issues/29)
-
----
-
-[v0.1.1](http://mithril.js.org/archive/v0.1.1) - maintenance
-
-### News:
-
--	Mithril is now available at [cdnjs](http://cdnjs.com/librarieshttp://mithril.js.org/) and [jsdelivr](http://www.jsdelivr.com/#!mithril)
-
-### Bug Fixes:
-
--	`m.route.param` now resets on route change correctly [#15](https://github.com/lhorie/mithril.js/issues/15)
--	`m.render` now correctly ignores undefined values in the virtual tree[#16](https://github.com/lhorie/mithril.js/issues/16)
--	errors thrown in promises now cause downstreams to be rejected [#1](https://github.com/lhorie/mithril.js/issues/1)
-
-### Breaking changes:
-
--	changed default value for `xhr.withCredentials` from `true` to `false` for `m.request`, since public APIs are more common than auth-walled ones. [#14](https://github.com/lhorie/mithril.js/issues/14)
-
-	In order to configure this flag, the following configuration should be used:
-	
-	```javascript
-	var privateAPI = function(xhr) {xhr.withCredentials = true};
-	
-	m.request({method: "GET", url: "http://foo.com/api", config: privateAPI});
-	```
+If available the DOM-Element of the vnode can be accessed at `vnode.dom`.
 
 ---
 
-[v0.1](http://mithril.js.org/archive/v0.1) - Initial release
+## Changes in redraw behaviour
+
+Mithril's rendering engine still operates on the basis of semi-automated global redraws, but some APIs and behaviours differ:
+
+### No more redraw locks
+
+In v0.2.x, Mithril allowed 'redraw locks' which temporarily prevented blocked draw logic: by default, `m.request` would lock the draw loop on execution and unlock when all pending requests had resolved - the same behaviour could be invoked manually using `m.startComputation()` and `m.endComputation()`. The latter APIs and the associated behaviour has been removed in v1.x. Redraw locking can lead to buggy UIs: the concerns of one part of the application should not be allowed to prevent other parts of the view from updating to reflect change.
+
+### Cancelling redraw from event handlers
+
+`m.mount()` and `m.route()` still automatically redraw after a DOM event handler runs. Cancelling these redraws from within your event handlers is now done by setting the `redraw` property on the passed-in event object to `false`.
+
+#### `v0.2.x`
+
+```javascript
+m("div", {
+    onclick : function(e) {
+        m.redraw.strategy("none")
+    }
+})
+```
+
+#### `v1.x`
+
+```javascript
+m("div", {
+    onclick : function(e) {
+        e.redraw = false
+    }
+})
+```
+
+### Synchronous redraw removed
+
+In v0.2.x it was possible to force mithril to redraw immediately by passing a truthy value to `m.redraw()`. This behavior complicated usage of `m.redraw()` and caused some hard-to-reason about issues and has been removed.
+
+#### `v0.2.x`
+
+```javascript
+m.redraw(true) // redraws immediately & synchronously
+```
+
+#### `v1.x`
+
+```javascript
+m.redraw() // schedules a redraw on the next requestAnimationFrame tick
+```
+
+### `m.startComputation`/`m.endComputation` removed
+
+They are considered anti-patterns and have a number of problematic edge cases, so they no longer exist in v1.x.
+
+---
+
+## Component `controller` function
+
+In `v1.x` there is no more `controller` property in components, use `oninit` instead.
+
+### `v0.2.x`
+
+```javascript
+m.mount(document.body, {
+    controller : function() {
+        var ctrl = this
+
+        ctrl.fooga = 1
+    },
+
+    view : function(ctrl) {
+        return m("p", ctrl.fooga)
+    }
+})
+```
+
+### `v1.x`
+
+```javascript
+m.mount(document.body, {
+    oninit : function(vnode) {
+        vnode.state.fooga = 1
+    },
+
+    view : function(vnode) {
+        return m("p", vnode.state.fooga)
+    }
+})
+
+// OR
+
+m.mount(document.body, {
+    oninit : function(vnode) {
+        var state = this  // this is bound to vnode.state by default
+
+        state.fooga = 1
+    },
+
+    view : function(vnode) {
+        var state = this // this is bound to vnode.state by default
+
+        return m("p", state.fooga)
+    }
+})
+```
+
+---
+
+## Component arguments
+
+Arguments to a component in `v1.x` must be an object, simple values like `String`/`Number`/`Boolean` will be treated as text children. Arguments are accessed within the component by reading them from the `vnode.attrs` object.
+
+### `v0.2.x`
+
+```javascript
+var component = {
+    controller : function(options) {
+        // options.fooga === 1
+    },
+
+    view : function(ctrl, options) {
+        // options.fooga == 1
+    }
+}
+
+m("div", m.component(component, { fooga : 1 }))
+```
+
+### `v1.x`
+
+```javascript
+var component = {
+    oninit : function(vnode) {
+        // vnode.attrs.fooga === 1
+    },
+
+    view : function(vnode) {
+        // vnode.attrs.fooga == 1
+    }
+}
+
+m("div", m(component, { fooga : 1 }))
+```
+
+---
+
+## `view()` parameters
+
+In `v0.2.x` view functions are passed a reference to the `controller` instance and (optionally) any options passed to the component. In `v1.x` they are passed **only** the `vnode`, exactly like the `controller` function.
+
+### `v0.2.x`
+
+```javascript
+m.mount(document.body, {
+    controller : function() {},
+
+    view : function(ctrl, options) {
+        // ...
+    }
+})
+```
+
+### `v1.x`
+
+```javascript
+m.mount(document.body, {
+    oninit : function(vnode) {
+        // ...
+    },
+
+    view : function(vnode) {
+        // Use vnode.state instead of ctrl
+        // Use vnode.attrs instead of options
+    }
+})
+```
+
+---
+
+## Passing components to `m()`
+
+In `v0.2.x` you could pass components as the second argument of `m()` w/o any wrapping required. To help with consistency in `v1.x` they must always be wrapped with a `m()` invocation.
+
+### `v0.2.x`
+
+```javascript
+m("div", component)
+```
+
+### `v1.x`
+
+```javascript
+m("div", m(component))
+```
+
+---
+
+## Passing vnodes to `m.mount()` and `m.route()`
+
+In `v0.2.x`, `m.mount(element, component)` tolerated [vnodes](vnodes.md) as second arguments instead of [components](components.md) (even though it wasn't documented). Likewise, `m.route(element, defaultRoute, routes)` accepted vnodes as values in the `routes` object.
+
+In `v1.x`, components are required instead in both cases.
+
+### `v0.2.x`
+
+```javascript
+m.mount(element, m('i', 'hello'))
+m.mount(element, m(Component, attrs))
+
+m.route(element, '/', {
+    '/': m('b', 'bye')
+})
+```
+
+### `v1.x`
+
+```javascript
+m.mount(element, {view: function () {return m('i', 'hello')}})
+m.mount(element, {view: function () {return m(Component, attrs)}})
+
+m.route(element, '/', {
+    '/': {view: function () {return m('b', 'bye')}}
+})
+```
+
+---
+
+## `m.route.mode`
+
+In `v0.2.x` the routing mode could be set by assigning a string of `"pathname"`, `"hash"`, or `"search"` to `m.route.mode`. In `v.1.x` it is replaced by `m.route.prefix(prefix)` where `prefix` can be `#`, `?`, or an empty string (for "pathname" mode). The new API also supports hashbang (`#!`), which is the default, and it supports non-root pathnames and arbitrary mode variations such as querybang (`?!`)
+
+### `v0.2.x`
+
+```javascript
+m.route.mode = "pathname"
+m.route.mode = "search"
+```
+
+### `v1.x`
+
+```javascript
+m.route.prefix("")
+m.route.prefix("?")
+```
+
+---
+
+## `m.route()` and anchor tags
+
+Handling clicks on anchor tags via the mithril router is similar to `v0.2.x` but uses a new lifecycle method and API.
+
+### `v0.2.x`
+
+```javascript
+// When clicked this link will load the "/path" route instead of navigating
+m("a", {
+    href   : "/path",
+    config : m.route
+})
+```
+
+### `v1.x`
+
+```javascript
+// When clicked this link will load the "/path" route instead of navigating
+m("a", {
+    href     : "/path",
+    oncreate : m.route.link
+})
+```
+
+---
+
+## Reading/writing the current route
+
+In `v0.2.x` all interaction w/ the current route happened via `m.route()`. In `v1.x` this has been broken out into two functions.
+
+### `v0.2.x`
+
+```javascript
+// Getting the current route
+m.route()
+
+// Setting a new route
+m.route("/other/route")
+```
+
+### `v1.x`
+
+```javascript
+// Getting the current route
+m.route.get()
+
+// Setting a new route
+m.route.set("/other/route")
+```
+
+---
+
+## Accessing route params
+
+In `v0.2.x` reading route params was entirely handled through `m.route.param()`. This API is still available in `v1.x`, and additionally any route params are passed as properties in the `attrs` object on the vnode.
+
+### `v0.2.x`
+
+```javascript
+m.route(document.body, "/booga", {
+    "/:attr" : {
+        controller : function() {
+            m.route.param("attr") // "booga"
+        },
+        view : function() {
+            m.route.param("attr") // "booga"
+        }
+    }
+})
+```
+
+### `v1.x`
+
+```javascript
+m.route(document.body, "/booga", {
+    "/:attr" : {
+        oninit : function(vnode) {
+            vnode.attrs.attr // "booga"
+            m.route.param("attr") // "booga"
+        },
+        view : function(vnode) {
+            vnode.attrs.attr // "booga"
+            m.route.param("attr") // "booga"
+        }
+    }
+})
+```
+
+---
+
+## Building/Parsing query strings
+
+`v0.2.x` used methods hanging off of `m.route`, `m.route.buildQueryString()` and `m.route.parseQueryString()`. In `v1.x` these have been broken out and attached to the root `m`.
+
+### `v0.2.x`
+
+```javascript
+var qs = m.route.buildQueryString({ a : 1 });
+
+var obj = m.route.parseQueryString("a=1");
+```
+
+### `v1.x`
+
+```javascript
+var qs = m.buildQueryString({ a : 1 });
+
+var obj = m.parseQueryString("a=1");
+```
+
+---
+
+## Preventing unmounting
+
+It is no longer possible to prevent unmounting via `onunload`'s `e.preventDefault()`. Instead you should explicitly call `m.route.set` when the expected conditions are met.
+
+### `v0.2.x`
+
+```javascript
+var Component = {
+    controller: function() {
+        this.onunload = function(e) {
+            if (condition) e.preventDefault()
+        }
+    },
+    view: function() {
+        return m("a[href=/]", {config: m.route})
+    }
+}
+```
+
+### `v1.x`
+
+```javascript
+var Component = {
+    view: function() {
+        return m("a", {onclick: function() {if (!condition) m.route.set("/")}})
+    }
+}
+```
+
+---
+
+## Run code on component removal
+
+Components no longer call `this.onunload` when they are being removed. They now use the standardized lifecycle hook `onremove`.
+
+### `v0.2.x`
+
+```javascript
+var Component = {
+    controller: function() {
+        this.onunload = function(e) {
+            // ...
+        }
+    },
+    view: function() {
+        // ...
+    }
+}
+```
+
+### `v1.x`
+
+```javascript
+var Component = {
+    onremove : function() {
+        // ...
+    }
+    view: function() {
+        // ...
+    }
+}
+```
+
+---
+
+## m.request
+
+Promises returned by [m.request](request.md) are no longer `m.prop` getter-setters. In addition, `initialValue`, `unwrapSuccess` and `unwrapError` are no longer supported options.
+
+In addition, requests no longer have `m.startComputation`/`m.endComputation` semantics. Instead, redraws are always triggered when a request promise chain completes (unless `background:true` is set).
+
+### `v0.2.x`
+
+```javascript
+var data = m.request({
+    method: "GET",
+    url: "https://api.github.com/",
+    initialValue: [],
+})
+
+setTimeout(function() {
+    console.log(data())
+}, 1000)
+```
+
+### `v1.x`
+
+```javascript
+var data = []
+m.request({
+    method: "GET",
+    url: "https://api.github.com/",
+})
+.then(function (responseBody) {
+    data = responseBody
+})
+
+setTimeout(function() {
+    console.log(data) // note: not a getter-setter
+}, 1000)
+```
+
+Additionally, if the `extract` option is passed to `m.request` the return value of the provided function will be used directly to resolve the request promise, and the `deserialize` callback is ignored.
+
+---
+
+## `m.deferred` removed
+
+`v0.2.x` used its own custom asynchronous contract object, exposed as `m.deferred`, which was used as the basis for `m.request`. `v1.x` uses Promises instead, and implements a [polyfill](promises.md) in non-supporting environments. In situations where you would have used `m.deferred`, you should use Promises instead.
+
+### `v0.2.x`
+
+```javascript
+var greetAsync = function() {
+    var deferred = m.deferred()
+    setTimeout(function() {
+        deferred.resolve("hello")
+    }, 1000)
+    return deferred.promise
+}
+
+greetAsync()
+    .then(function(value) {return value + " world"})
+    .then(function(value) {console.log(value)}) //logs "hello world" after 1 second
+```
+
+### `v1.x`
+
+```javascript
+var greetAsync = function() {
+    return new Promise(function(resolve){
+        setTimeout(function() {
+            resolve("hello")
+        }, 1000)
+    })
+}
+
+greetAsync()
+    .then(function(value) {return value + " world"})
+    .then(function(value) {console.log(value)}) //logs "hello world" after 1 second
+```
+
+---
+
+## `m.sync` removed
+
+Since `v1.x` uses standards-compliant Promises, `m.sync` is redundant. Use `Promise.all` instead.
+
+### `v0.2.x`
+
+```javascript
+m.sync([
+    m.request({ method: 'GET', url: 'https://api.github.com/users/lhorie' }),
+    m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
+])
+.then(function (users) {
+    console.log("Contributors:", users[0].name, "and", users[1].name)
+})
+```
+
+### `v1.x`
+
+```javascript
+Promise.all([
+    m.request({ method: 'GET', url: 'https://api.github.com/users/lhorie' }),
+    m.request({ method: 'GET', url: 'https://api.github.com/users/isiahmeadows' }),
+])
+.then(function (users) {
+    console.log("Contributors:", users[0].name, "and", users[1].name)
+})
+```
+
+---
+
+## `xlink` namespace required
+
+In `v0.2.x`, the `xlink` namespace was the only supported attribute namespace, and it was supported via special casing behavior. Now namespace parsing is fully supported, and namespaced attributes should explicitly declare their namespace.
+
+### `v0.2.x`
+
+```javascript
+m("svg",
+    // the `href` attribute is namespaced automatically
+    m("image[href='image.gif']")
+)
+```
+
+### `v1.x`
+
+```javascript
+m("svg",
+    // User-specified namespace on the `href` attribute
+    m("image[xlink:href='image.gif']")
+)
+```
+
+---
+
+## Nested arrays in views
+
+Arrays now represent [fragments](fragment.md), which are structurally significant in v1.x virtual DOM. Whereas nested arrays in v0.2.x would be flattened into one continuous list of virtual nodes for the purposes of diffing, v1.x preserves the array structure - the children of any given array are not considered siblings of those of adjacent arrays.
+
+---
+
+## `vnode` equality checks
+
+If a vnode is strictly equal to the vnode occupying its place in the last draw, v1.x will skip that part of the tree without checking for mutations or triggering any lifecycle methods in the subtree. The component documentation contains [more detail on this issue](components.md#avoid-creating-component-instances-outside-views).
